@@ -17,6 +17,7 @@ deeplgobindings allows automated interaction with DeepL translation's API in Gol
 have access to the API if you are a paid user with the plan "Pro" and above.
 
 ## Features
+
 The following list contains all features which are/should be supported (in the future):
 - [ ] translate Function (*/v2/translate*)
 - [ ] usage Function (*/v2/usage*)
@@ -24,4 +25,10 @@ The following list contains all features which are/should be supported (in the f
 - [ ] implement DeepL API's limitation rules
 
 ## Usage
+
 As soon as code is available, examples for the usage should be listed up here.
+
+## Contribution
+
+Feel free to contribute and help this project to grow. You can also just suggest features/enhancements. In the future, 
+there will be a contributing file for newbies to read.
