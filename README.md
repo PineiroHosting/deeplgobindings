@@ -22,3 +22,6 @@ The following list contains all features which are/should be supported (in the f
 - [ ] usage Function (*/v2/usage*)
 - [ ] support POST and GET request methods
 - [ ] implement DeepL API's limitation rules
+
+## Usage
+As soon as code is available, examples for the usage should be listed up here.
