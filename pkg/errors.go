@@ -1,4 +1,4 @@
-package deeplgobindings
+package deeplclient
 
 import (
 	"fmt"
@@ -37,7 +37,7 @@ type AuthFailedErr struct {
 
 // Error returns a compact version of all error information in order to implement the error interface.
 func (err *AuthFailedErr) Error() string {
-	return fmt.Sprintf("server returned status code 403 (autorization failed): %s", strconv.Quote(err.Message))
+	return fmt.Sprintf("server returned status code 403 (autorization failed)")
 }
 
 // RequestEntityTooLargeErr indicates the response code 413 returned by the remote API server and contains the error message.
