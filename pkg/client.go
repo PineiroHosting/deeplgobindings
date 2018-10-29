@@ -51,7 +51,8 @@ func (client *Client) doApiFunction(uri string, values *url.Values) (resp *http.
 		break
 	case http.StatusForbidden:
 		err = &AuthFailedErr{}
-		break
+		resp.Body.Close()
+		return
 	case http.StatusRequestEntityTooLarge:
 		err = &RequestEntityTooLargeErr{}
 		break
@@ -66,7 +67,7 @@ func (client *Client) doApiFunction(uri string, values *url.Values) (resp *http.
 		resp.Body.Close()
 		return nil, err
 	}
-	if jsonErr := json.NewDecoder(resp.Body).Decode(err); err != nil {
+	if jsonErr := json.NewDecoder(resp.Body).Decode(err); jsonErr != nil {
 		resp.Body.Close()
 		return nil, jsonErr
 	}
@@ -96,7 +97,7 @@ const (
 
 // String returns the very basic string representation of the API language.
 func (apiLang ApiLang) String() string {
-	return fmt.Sprintf("API-lang:%s", string(apiLang))
+	return string(apiLang)
 }
 
 // LangFromString tries to find and return the matching wrapped API language type.
@@ -174,15 +175,16 @@ func (client *Client) Translate(req *TranslationRequest) (resp *TranslationRespo
 	// parse url values for HTTP request
 	values := &url.Values{}
 	if len(req.Text) == 0 {
-		return resp, errors.New("\"Text\" field of translation request cannot be empty")
+		return resp, errors.New("'Text' field of translation request cannot be empty")
 	}
 	values.Add("text", req.Text)
 	if req.SourceLang != "" {
-		values.Add("source_lang", string(req.SourceLang))
+		values.Add("source_lang", req.SourceLang.String())
 	}
 	if len(req.TargetLang) == 0 {
-		return resp, errors.New("\"TargetLang\" field of translation request cannot be omitted")
+		return resp, errors.New("'TargetLang' field of translation request cannot be omitted")
 	}
+	values.Add("target_lang", req.TargetLang.String())
 	if len(req.TagHandling) > 0 {
 		values.Add("tag_handling", strings.Join(req.TagHandling, ","))
 	}
