@@ -59,3 +59,22 @@ func (client *DeeplClient) doApiFunction(uri string, values *url.Values) (resp *
 	resp.Body.Close()
 	return
 }
+
+type TranslationRequest struct {
+	Text               string
+	SourceLang         string
+	TargetLang         string
+	TagHandling        []string
+	NonSplittingTags   []string
+	IgnoreTags         []string
+	SplitSentences     bool
+	PreserveFormatting bool
+}
+
+type TranslationResponse struct {
+	Translations []struct {
+		DetectedSourceLanguage string `json:"detected_source_language"`
+		Text                   string `json:"text"`
+	} `json:"translations"`
+}
+
