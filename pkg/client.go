@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"github.com/bwmarrin/discordgo"
+	"github.com/kataras/iris/core/errors"
 )
 
 const (
@@ -110,30 +112,31 @@ func LangFromString(apiLangString string) (error, ApiLang) {
 // TranslationRequest contains the payload data for each translation request.
 type TranslationRequest struct {
 	// field comments partially taken from official DeepL API documentation
-	//
+	
 	// Text to be translated. Only UTF8-encoded plain text is supported. The parameter may be specified multiple times
 	// and translations are returned in the same order as in the input. Each of the parameter values may contain
 	// multiple sentences.
 	Text string
-	// Language of the text to be translated. If parameter is omitted, the API will detect the language of the text and
-	// translate it.
+	// SourceLang is the language of the text to be translated. If parameter is omitted, the API will detect the
+	// language of the text and translate it.
 	SourceLang ApiLang
-	// The language into which you want to translate.
+	// TargetLang determines the language into which you want to translate.
 	TargetLang         ApiLang
-	// Sets which kind of tags should be handled. Comma-separated list of one or more values. See official DeepL API
-	// documentation for more details about tag handling.
+	// TagHandling sets which kind of tags should be handled. Comma-separated list of one or more values. See official
+	// DeepL API documentation for more details about tag handling.
 	TagHandling        []string
-	// Comma-separated list of XML tags which never split sentences. See official DeepL API documentation for more
-	// details about tag handling.
+	// NonSplittingTags contains a list of XML tags which never split sentences. See official DeepL API documentation
+	// for more details about tag handling.
 	NonSplittingTags   []string
-	// Comma-separated list of XML tags whose content is never translated. See official DeepL API documentation for more
-	//	// details about tag handling.
+	// IgnoreTags contains a list of XML tags whose content is never translated. See official DeepL API documentation
+	// for more details about tag handling.
 	IgnoreTags         []string
-	// Sets whether the translation engine should first split the input into sentences. True by default.
+	// DoNotSplitSentences sets whether the translation engine should first split the input into sentences. False by
+	// default.
 	//
 	// For applications which are sending one sentence per text parameter, it is advisable to set this to false, in
 	// order to prevent the engine from splitting the sentence unintentionally.
-	SplitSentences     bool
+	DoNotSplitSentences bool
 	// Sets whether the translation engine should preserve some aspects of the formatting, even if it would usually
 	// correct some aspects. False by default.
 	//
@@ -152,4 +155,38 @@ type TranslationResponse struct {
 		// Text contains the translated text.
 		Text                   string `json:"text"`
 	} `json:"translations"`
+}
+
+// Translate translate the requested text and returns the translated text or an error if something went wrong.
+func (client *DeeplClient) Translate(req *TranslationRequest) (resp *TranslationResponse, err error) {
+	// parse url values for HTTP request
+	values := &url.Values{}
+	if len(req.Text) == 0 {
+		return resp, errors.New("\"Text\" field of translation request cannot be empty")
+	}
+	values.Add("text", req.Text)
+	if req.SourceLang != "" {
+		values.Add("source_lang", string(req.SourceLang))
+	}
+	if len(req.TargetLang) == 0 {
+		return resp, errors.New("\"TargetLang\" field of translation request cannot be omitted")
+	}
+	if len(req.TagHandling) > 0 {
+		values.Add("tag_handling", strings.Join(req.TagHandling, ","))
+	}
+	if len(req.NonSplittingTags) > 0 {
+		values.Add("non_splitting_tags", strings.Join(req.NonSplittingTags, ","))
+	}
+	if len(req.IgnoreTags) > 0 {
+		values.Add("ignore_tags", strings.Join(req.IgnoreTags, ","))
+	}
+	// inverted functionality from DeepL in order to be able to use the default values of Go
+	if req.DoNotSplitSentences {
+		values.Add("split_sentences", "0")
+	}
+	// do not get confused with different handling for both booleans
+	if req.PreserveFormatting {
+		values.Add("preserve_formatting", "1")
+	}
+	resp = &TranslationResponse{}
 }
