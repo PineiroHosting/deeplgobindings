@@ -11,7 +11,9 @@ import (
 
 const (
 	deeplBaseApiUrl      = "https://api.deepl.com/v2/"
-	authKeyparamName     = "auth_key"
+	authKeyParamName     = "auth_key"
+	// unofficial internal HTTP status code for "Quota exceeded"
+	StatusQuotaExceeded  = 456
 	translateFunctionUri = "translate"
 )
 
@@ -26,7 +28,7 @@ type DeeplClient struct {
 // a slash character.
 func (client *DeeplClient) doApiFunction(uri string, values *url.Values) (resp *http.Response, err error) {
 	// add authentication header and encode values
-	values.Set(authKeyparamName, string(client.AuthKey))
+	values.Set(authKeyParamName, string(client.AuthKey))
 	body := strings.NewReader(values.Encode())
 	// create new http request
 	var req *http.Request
@@ -48,6 +50,15 @@ func (client *DeeplClient) doApiFunction(uri string, values *url.Values) (resp *
 		break
 	case http.StatusForbidden:
 		err = &AuthFailedErr{}
+		break
+	case http.StatusRequestEntityTooLarge:
+		err = &RequestEntityTooLargeErr{}
+		break
+	case http.StatusTooManyRequests:
+		err = &TooManyRequestsErr{}
+		break
+	case StatusQuotaExceeded:
+		err = &QuotaExceededErr{}
 		break
 	default:
 		err = UnwrappedApiResponseCodeErr(resp.StatusCode)
