@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kataras/iris/core/errors"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -27,16 +28,22 @@ type Client struct {
 
 // doApiFunction is an internally used function to execute API functions more easily. The param uri should not begin with
 // a slash character.
-func (client *Client) doApiFunction(uri string, values *url.Values) (resp *http.Response, err error) {
+func (client *Client) doApiFunction(uri, method string, values *url.Values) (resp *http.Response, err error) {
 	// add authentication header and encode values
 	values.Set(authKeyParamName, string(client.AuthKey))
-	body := strings.NewReader(values.Encode())
 	// create new http request
 	var req *http.Request
-	if req, err = http.NewRequest(http.MethodPost, fmt.Sprintf("%s%s", deeplBaseApiUrl, uri), body); err != nil {
+	var url string
+	var body io.Reader
+	if method == http.MethodPost {
+		url = fmt.Sprintf("%s%s", deeplBaseApiUrl, uri)
+		body = strings.NewReader(values.Encode())
+	} else {
+		url = fmt.Sprintf("%s%s?%s", deeplBaseApiUrl, uri, values.Encode())
+	}
+	if req, err = http.NewRequest(method, url, body); err != nil {
 		return
 	}
-	req.ContentLength = body.Size()
 	// add header to allow the server to identify the POST request
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	if resp, err = client.Do(req); err != nil {
@@ -51,7 +58,8 @@ func (client *Client) doApiFunction(uri string, values *url.Values) (resp *http.
 		break
 	case http.StatusForbidden:
 		err = &AuthFailedErr{}
-		break
+		resp.Body.Close()
+		return
 	case http.StatusRequestEntityTooLarge:
 		err = &RequestEntityTooLargeErr{}
 		break
@@ -66,7 +74,7 @@ func (client *Client) doApiFunction(uri string, values *url.Values) (resp *http.
 		resp.Body.Close()
 		return nil, err
 	}
-	if jsonErr := json.NewDecoder(resp.Body).Decode(err); err != nil {
+	if jsonErr := json.NewDecoder(resp.Body).Decode(err); jsonErr != nil {
 		resp.Body.Close()
 		return nil, jsonErr
 	}
@@ -96,7 +104,7 @@ const (
 
 // String returns the very basic string representation of the API language.
 func (apiLang ApiLang) String() string {
-	return fmt.Sprintf("API-lang:%s", string(apiLang))
+	return string(apiLang)
 }
 
 // LangFromString tries to find and return the matching wrapped API language type.
@@ -174,15 +182,16 @@ func (client *Client) Translate(req *TranslationRequest) (resp *TranslationRespo
 	// parse url values for HTTP request
 	values := &url.Values{}
 	if len(req.Text) == 0 {
-		return resp, errors.New("\"Text\" field of translation request cannot be empty")
+		return resp, errors.New("'Text' field of translation request cannot be empty")
 	}
 	values.Add("text", req.Text)
 	if req.SourceLang != "" {
-		values.Add("source_lang", string(req.SourceLang))
+		values.Add("source_lang", req.SourceLang.String())
 	}
 	if len(req.TargetLang) == 0 {
-		return resp, errors.New("\"TargetLang\" field of translation request cannot be omitted")
+		return resp, errors.New("'TargetLang' field of translation request cannot be omitted")
 	}
+	values.Add("target_lang", req.TargetLang.String())
 	if len(req.TagHandling) > 0 {
 		values.Add("tag_handling", strings.Join(req.TagHandling, ","))
 	}
@@ -201,7 +210,7 @@ func (client *Client) Translate(req *TranslationRequest) (resp *TranslationRespo
 		values.Add("preserve_formatting", "1")
 	}
 	var httpResp *http.Response
-	httpResp, err = client.doApiFunction(translateFunctionUri, values)
+	httpResp, err = client.doApiFunction(translateFunctionUri, http.MethodPost, values)
 	if err != nil {
 		return
 	}
@@ -223,7 +232,7 @@ type UsageResponse struct {
 func (client *Client) GetUsage() (resp *UsageResponse, err error) {
 	// execute api function
 	var httpResp *http.Response
-	httpResp, err = client.doApiFunction(usageFunctionUri, &url.Values{})
+	httpResp, err = client.doApiFunction(usageFunctionUri, http.MethodGet, &url.Values{})
 	// check for error
 	if err != nil {
 		return
