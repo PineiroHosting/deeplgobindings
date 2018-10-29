@@ -1,6 +1,7 @@
 package deeplgobindings
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -36,12 +37,25 @@ func (client *DeeplClient) doApiFunction(uri string, values *url.Values) (resp *
 	if resp, err = client.Do(req); err != nil {
 		return nil, err
 	}
+	// check status code and wrap response
 	switch resp.StatusCode {
 	case http.StatusOK:
 		return
+	case http.StatusBadRequest:
+		err = &WrongRequestErr{}
+		break
+	case http.StatusForbidden:
+		err = &AuthFailedErr{}
+		break
 	default:
 		err = UnwrappedApiResponseCodeErr(resp.StatusCode)
+		resp.Body.Close()
 		return nil, err
 	}
+	if jsonErr := json.NewDecoder(resp.Body).Decode(err); err != nil {
+		resp.Body.Close()
+		return nil, jsonErr
+	}
+	resp.Body.Close()
 	return
 }
