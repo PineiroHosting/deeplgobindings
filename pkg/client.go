@@ -10,11 +10,12 @@ import (
 )
 
 const (
-	deeplBaseApiUrl      = "https://api.deepl.com/v2/"
-	authKeyParamName     = "auth_key"
+	deeplBaseApiUrl  = "https://api.deepl.com/v2/"
+	authKeyParamName = "auth_key"
 	// unofficial internal HTTP status code for "Quota exceeded"
 	StatusQuotaExceeded  = 456
 	translateFunctionUri = "translate"
+	usageFunctionUri     = "usage"
 )
 
 // DeeplClient allows easy access to the DeepL API by providing methods for each API function.
@@ -168,6 +169,14 @@ type TranslationResponse struct {
 	} `json:"translations"`
 }
 
+// UsageResponse represents the data of the json response of the usage API function.
+type UsageResponse struct {
+	// CharacterCount contains the amount of characters translated so far in the current billing period.
+	CharacterCount int64 `json:"character_count"`
+	// CharacterLimit contains the maximum volume of characters that can be translated in the current billing period.
+	CharacterLimit int64 `json:"character_limit"`
+}
+
 // Translate translate the requested text and returns the translated text or an error if something went wrong.
 func (client *DeeplClient) Translate(req *TranslationRequest) (resp *TranslationResponse, err error) {
 	// parse url values for HTTP request
@@ -206,6 +215,22 @@ func (client *DeeplClient) Translate(req *TranslationRequest) (resp *Translation
 	}
 	defer httpResp.Body.Close()
 	resp = &TranslationResponse{}
+	err = json.NewDecoder(httpResp.Body).Decode(resp)
+	return
+}
+
+// GetUsage returns the usage information for the current billing period.
+func (client *DeeplClient) GetUsage() (resp *UsageResponse, err error) {
+	// execute api function
+	var httpResp *http.Response
+	httpResp, err = client.doApiFunction(usageFunctionUri, &url.Values{})
+	// check for error
+	if err != nil {
+		return
+	}
+	// parse answer into UsageResponse struct
+	defer httpResp.Body.Close()
+	resp = &UsageResponse{}
 	err = json.NewDecoder(httpResp.Body).Decode(resp)
 	return
 }
