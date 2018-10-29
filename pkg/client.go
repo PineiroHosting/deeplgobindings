@@ -3,16 +3,16 @@ package deeplgobindings
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/kataras/iris/core/errors"
 	"net/http"
 	"net/url"
 	"strings"
-	"github.com/bwmarrin/discordgo"
-	"github.com/kataras/iris/core/errors"
 )
 
 const (
-	deeplBaseApiUrl  = "https://api.deepl.com/v2/"
-	authKeyparamName = "auth_key"
+	deeplBaseApiUrl      = "https://api.deepl.com/v2/"
+	authKeyparamName     = "auth_key"
+	translateFunctionUri = "translate"
 )
 
 // DeeplClient allows easy access to the DeepL API by providing methods for each API function.
@@ -112,7 +112,7 @@ func LangFromString(apiLangString string) (error, ApiLang) {
 // TranslationRequest contains the payload data for each translation request.
 type TranslationRequest struct {
 	// field comments partially taken from official DeepL API documentation
-	
+
 	// Text to be translated. Only UTF8-encoded plain text is supported. The parameter may be specified multiple times
 	// and translations are returned in the same order as in the input. Each of the parameter values may contain
 	// multiple sentences.
@@ -121,16 +121,16 @@ type TranslationRequest struct {
 	// language of the text and translate it.
 	SourceLang ApiLang
 	// TargetLang determines the language into which you want to translate.
-	TargetLang         ApiLang
+	TargetLang ApiLang
 	// TagHandling sets which kind of tags should be handled. Comma-separated list of one or more values. See official
 	// DeepL API documentation for more details about tag handling.
-	TagHandling        []string
+	TagHandling []string
 	// NonSplittingTags contains a list of XML tags which never split sentences. See official DeepL API documentation
 	// for more details about tag handling.
-	NonSplittingTags   []string
+	NonSplittingTags []string
 	// IgnoreTags contains a list of XML tags whose content is never translated. See official DeepL API documentation
 	// for more details about tag handling.
-	IgnoreTags         []string
+	IgnoreTags []string
 	// DoNotSplitSentences sets whether the translation engine should first split the input into sentences. False by
 	// default.
 	//
@@ -153,7 +153,7 @@ type TranslationResponse struct {
 		// DetectedSourceLanguage contains the ApiLang detected by the DeepL API.
 		DetectedSourceLanguage ApiLang `json:"detected_source_language"`
 		// Text contains the translated text.
-		Text                   string `json:"text"`
+		Text string `json:"text"`
 	} `json:"translations"`
 }
 
@@ -184,9 +184,17 @@ func (client *DeeplClient) Translate(req *TranslationRequest) (resp *Translation
 	if req.DoNotSplitSentences {
 		values.Add("split_sentences", "0")
 	}
-	// do not get confused with different handling for both booleans
+	// do not get confused with the different handling for both booleans
 	if req.PreserveFormatting {
 		values.Add("preserve_formatting", "1")
 	}
+	var httpResp *http.Response
+	httpResp, err = client.doApiFunction(translateFunctionUri, values)
+	if err != nil {
+		return
+	}
+	defer httpResp.Body.Close()
 	resp = &TranslationResponse{}
+	err = json.NewDecoder(httpResp.Body).Decode(resp)
+	return
 }
