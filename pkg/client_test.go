@@ -20,10 +20,32 @@ func TestTranslation(t *testing.T)  {
 		Text:"Hallo Welt!",
 		TargetLang:LangEN,
 	}); err != nil {
-		panic(err)
+		t.Fatal(err)
 	} else {
-		t.Logf("received response from DeepL API: %+v", resp)
+		t.Logf("received translation response from DeepL API: %+v", resp)
 		if len(resp.Translations) != 1 {
+			t.Fail()
+		}
+	}
+}
+
+func TestGetUsage(t *testing.T) {
+	authKey := os.Getenv("DEEPL_TEST_AUTH_KEY")
+	if authKey == "" {
+		t.Fatal("could not find 'DEEPL_TEST_AUTH_KEY' environment variable")
+	}
+	client := &Client{
+		Client:&http.Client{},
+		AuthKey:[]byte(authKey),
+	}
+	if resp, err :=client.GetUsage(); err != nil {
+		t.Fatal(err)
+	} else {
+		t.Logf("received usage response from DeepL API: %+v", resp)
+		if resp.CharacterCount < 0 {
+			t.Fail()
+		}
+		if resp.CharacterLimit < 0 {
 			t.Fail()
 		}
 	}
