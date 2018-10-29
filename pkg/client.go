@@ -36,5 +36,12 @@ func (client *DeeplClient) doApiFunction(uri string, values *url.Values) (resp *
 	if resp, err = client.Do(req); err != nil {
 		return nil, err
 	}
+	switch resp.StatusCode {
+	case http.StatusOK:
+		return
+	default:
+		err = UnwrappedApiResponseCodeErr(resp.StatusCode)
+		return nil, err
+	}
 	return
 }
