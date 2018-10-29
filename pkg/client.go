@@ -60,21 +60,96 @@ func (client *DeeplClient) doApiFunction(uri string, values *url.Values) (resp *
 	return
 }
 
+// ApiLang is a wrapper type for languages used in requests/responses within the translate function.
+type ApiLang string
+
+const (
+	// LangEN English (EN)
+	LangEN = ApiLang("EN")
+	// LangDE German (DE)
+	LangDE = ApiLang("DE")
+	// LangFR French (FR)
+	LangFR = ApiLang("FR")
+	// LangES Spanish (ES)
+	LangES = ApiLang("ES")
+	// LangIT Italian (IT)
+	LangIT = ApiLang("IT")
+	// LangNL Dutch (NL)
+	LangNL = ApiLang("NL")
+	// LangPL Polish (PL)
+	LangPL = ApiLang("PL")
+)
+
+// String returns the very basic string representation of the API language.
+func (apiLang ApiLang) String() string {
+	return fmt.Sprintf("API-lang:%s", string(apiLang))
+}
+
+// LangFromString tries to find and return the matching wrapped API language type.
+func LangFromString(apiLangString string) (error, ApiLang) {
+	switch apiLangString {
+	case "EN":
+		return nil, LangEN
+	case "DE":
+		return nil, LangDE
+	case "FR":
+		return nil, LangFR
+	case "ES":
+		return nil, LangES
+	case "IT":
+		return nil, LangIT
+	case "NL":
+		return nil, LangNL
+	case "PL":
+		return nil, LangPL
+	default:
+		return fmt.Errorf("could not find API language: %s", apiLangString), ""
+	}
+}
+
+// TranslationRequest contains the payload data for each translation request.
 type TranslationRequest struct {
-	Text               string
-	SourceLang         string
-	TargetLang         string
+	// field comments partially taken from official DeepL API documentation
+	//
+	// Text to be translated. Only UTF8-encoded plain text is supported. The parameter may be specified multiple times
+	// and translations are returned in the same order as in the input. Each of the parameter values may contain
+	// multiple sentences.
+	Text string
+	// Language of the text to be translated. If parameter is omitted, the API will detect the language of the text and
+	// translate it.
+	SourceLang ApiLang
+	// The language into which you want to translate.
+	TargetLang         ApiLang
+	// Sets which kind of tags should be handled. Comma-separated list of one or more values. See official DeepL API
+	// documentation for more details about tag handling.
 	TagHandling        []string
+	// Comma-separated list of XML tags which never split sentences. See official DeepL API documentation for more
+	// details about tag handling.
 	NonSplittingTags   []string
+	// Comma-separated list of XML tags whose content is never translated. See official DeepL API documentation for more
+	//	// details about tag handling.
 	IgnoreTags         []string
+	// Sets whether the translation engine should first split the input into sentences. True by default.
+	//
+	// For applications which are sending one sentence per text parameter, it is advisable to set this to false, in
+	// order to prevent the engine from splitting the sentence unintentionally.
 	SplitSentences     bool
+	// Sets whether the translation engine should preserve some aspects of the formatting, even if it would usually
+	// correct some aspects. False by default.
+	//
+	// The formatting aspects controlled by the setting include:
+	// 	punctuation at the beginning and end of the sentence,
+	// 	upper/lower case at the beginning of the sentence.
 	PreserveFormatting bool
 }
 
+// TranslationResponse represents the data of the json response of the translate API function.
 type TranslationResponse struct {
+	// Translations contains all requested translations and their results.
 	Translations []struct {
-		DetectedSourceLanguage string `json:"detected_source_language"`
+		// DetectedSourceLanguage contains the ApiLang detected by the DeepL API.
+		DetectedSourceLanguage ApiLang `json:"detected_source_language"`
+		// Text contains the translated text.
 		Text                   string `json:"text"`
 	} `json:"translations"`
 }
-
