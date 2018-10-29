@@ -35,7 +35,7 @@ When reporting errors or bugs, your issue should at least contain the following 
 
 In your pull request, you should:
 * describe the content, you changed and reference to a issue this request deals with, if there is one
-* list dependencies you have added to the project - run `godep ensure` if you added something (see [godep](https://github.com/golang/dep/) for more information)
+* list dependencies you have added to the project - run `dep ensure` if you added something (see [godep](https://github.com/golang/dep/) for more information)
 * reformat your files, just use `go fmt .` for this
 
 ## Code conventions

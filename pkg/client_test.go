@@ -1,24 +1,24 @@
 package deeplclient
 
 import (
-	"testing"
 	"net/http"
 	"os"
+	"testing"
 )
 
 // TestTranslation tests the functionality of the Translate API function within the deeplclient.
-func TestTranslation(t *testing.T)  {
+func TestTranslation(t *testing.T) {
 	authKey := os.Getenv("DEEPL_TEST_AUTH_KEY")
 	if authKey == "" {
 		t.Fatal("could not find 'DEEPL_TEST_AUTH_KEY' environment variable")
 	}
 	client := &Client{
-		Client:&http.Client{},
-		AuthKey:[]byte(authKey),
+		Client:  &http.Client{},
+		AuthKey: []byte(authKey),
 	}
-	if resp, err :=client.Translate(&TranslationRequest{
-		Text:"Hallo Welt!",
-		TargetLang:LangEN,
+	if resp, err := client.Translate(&TranslationRequest{
+		Text:       "Hallo Welt!",
+		TargetLang: LangEN,
 	}); err != nil {
 		t.Fatal(err)
 	} else {
@@ -35,10 +35,10 @@ func TestGetUsage(t *testing.T) {
 		t.Fatal("could not find 'DEEPL_TEST_AUTH_KEY' environment variable")
 	}
 	client := &Client{
-		Client:&http.Client{},
-		AuthKey:[]byte(authKey),
+		Client:  &http.Client{},
+		AuthKey: []byte(authKey),
 	}
-	if resp, err :=client.GetUsage(); err != nil {
+	if resp, err := client.GetUsage(); err != nil {
 		t.Fatal(err)
 	} else {
 		t.Logf("received usage response from DeepL API: %+v", resp)
