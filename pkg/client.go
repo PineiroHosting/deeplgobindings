@@ -1,4 +1,4 @@
-package deeplgobindings
+package deeplclient
 
 import (
 	"encoding/json"
@@ -10,15 +10,16 @@ import (
 )
 
 const (
-	deeplBaseApiUrl      = "https://api.deepl.com/v2/"
-	authKeyParamName     = "auth_key"
+	deeplBaseApiUrl  = "https://api.deepl.com/v2/"
+	authKeyParamName = "auth_key"
 	// unofficial internal HTTP status code for "Quota exceeded"
 	StatusQuotaExceeded  = 456
 	translateFunctionUri = "translate"
+	usageFunctionUri     = "usage"
 )
 
-// DeeplClient allows easy access to the DeepL API by providing methods for each API function.
-type DeeplClient struct {
+// Client allows easy access to the DeepL API by providing methods for each API function.
+type Client struct {
 	*http.Client
 	// AuthKey stores the authentication key required to get access DeepL's API.
 	AuthKey []byte
@@ -26,7 +27,7 @@ type DeeplClient struct {
 
 // doApiFunction is an internally used function to execute API functions more easily. The param uri should not begin with
 // a slash character.
-func (client *DeeplClient) doApiFunction(uri string, values *url.Values) (resp *http.Response, err error) {
+func (client *Client) doApiFunction(uri string, values *url.Values) (resp *http.Response, err error) {
 	// add authentication header and encode values
 	values.Set(authKeyParamName, string(client.AuthKey))
 	body := strings.NewReader(values.Encode())
@@ -168,8 +169,8 @@ type TranslationResponse struct {
 	} `json:"translations"`
 }
 
-// Translate translate the requested text and returns the translated text or an error if something went wrong.
-func (client *DeeplClient) Translate(req *TranslationRequest) (resp *TranslationResponse, err error) {
+// Translate translates the requested text and returns the translated text or an error if something went wrong.
+func (client *Client) Translate(req *TranslationRequest) (resp *TranslationResponse, err error) {
 	// parse url values for HTTP request
 	values := &url.Values{}
 	if len(req.Text) == 0 {
@@ -206,6 +207,30 @@ func (client *DeeplClient) Translate(req *TranslationRequest) (resp *Translation
 	}
 	defer httpResp.Body.Close()
 	resp = &TranslationResponse{}
+	err = json.NewDecoder(httpResp.Body).Decode(resp)
+	return
+}
+
+// UsageResponse represents the data of the json response of the usage API function.
+type UsageResponse struct {
+	// CharacterCount contains the amount of characters translated so far in the current billing period.
+	CharacterCount int64 `json:"character_count"`
+	// CharacterLimit contains the maximum volume of characters that can be translated in the current billing period.
+	CharacterLimit int64 `json:"character_limit"`
+}
+
+// GetUsage returns the usage information for the current billing period.
+func (client *Client) GetUsage() (resp *UsageResponse, err error) {
+	// execute api function
+	var httpResp *http.Response
+	httpResp, err = client.doApiFunction(usageFunctionUri, &url.Values{})
+	// check for error
+	if err != nil {
+		return
+	}
+	// parse answer into UsageResponse struct
+	defer httpResp.Body.Close()
+	resp = &UsageResponse{}
 	err = json.NewDecoder(httpResp.Body).Decode(resp)
 	return
 }

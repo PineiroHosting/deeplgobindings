@@ -1,4 +1,4 @@
-package deeplgobindings
+package deeplclient
 
 import (
 	"fmt"
