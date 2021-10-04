@@ -1,13 +1,9 @@
 SHELL := /bin/bash
 
-all: imports test
+all: test
 
 def:
 	@echo "Available commands: imports, test"
-
-imports:
-	@echo "Restoring imports..."
-	@dep ensure
 
 test:
 	@echo "Testing..."
