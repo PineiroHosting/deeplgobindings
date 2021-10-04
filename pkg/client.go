@@ -2,8 +2,8 @@ package deeplclient
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	"github.com/kataras/iris/core/errors"
 	"io"
 	"net/http"
 	"net/url"
