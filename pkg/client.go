@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 )
 
@@ -40,8 +41,8 @@ func (client *Client) doApiFunction(uri, method string, values *url.Values) (res
 	if method == http.MethodPost {
 		url = fmt.Sprintf("%s%s", deeplBaseApiUrl, uri)
 		valuesEncoded := values.Encode()
-		if valuesEncoded > maxBodySize {
-			return nil, errors.New("body size should not exceed maximum of " + maxBodySize)
+		if len(valuesEncoded) > maxBodySize {
+			return nil, errors.New("body size should not exceed maximum of " + strconv.Itoa(maxBodySize))
 		}
 		body = strings.NewReader(valuesEncoded)
 	} else {
