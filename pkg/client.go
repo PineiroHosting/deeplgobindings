@@ -12,7 +12,6 @@ import (
 )
 
 const (
-	deeplBaseApiUrl  = "https://api.deepl.com/v2/"
 	authKeyParamName = "auth_key"
 	// unofficial internal HTTP status code for "Quota exceeded"
 	StatusQuotaExceeded  = 456
@@ -26,7 +25,8 @@ const (
 type Client struct {
 	*http.Client
 	// AuthKey stores the authentication key required to get access DeepL's API.
-	AuthKey []byte
+	AuthKey     []byte
+	EndpointUrl string
 }
 
 // doApiFunction is an internally used function to execute API functions more easily. The param uri should not begin with
@@ -36,19 +36,19 @@ func (client *Client) doApiFunction(uri, method string, values *url.Values) (res
 	values.Set(authKeyParamName, string(client.AuthKey))
 	// create new http request
 	var req *http.Request
-	var url string
+	var requestUrl string
 	var body io.Reader
 	if method == http.MethodPost {
-		url = fmt.Sprintf("%s%s", deeplBaseApiUrl, uri)
+		requestUrl = fmt.Sprintf("%s%s", client.EndpointUrl, uri)
 		valuesEncoded := values.Encode()
 		if len(valuesEncoded) > maxBodySize {
 			return nil, errors.New("body size should not exceed maximum of " + strconv.Itoa(maxBodySize))
 		}
 		body = strings.NewReader(valuesEncoded)
 	} else {
-		url = fmt.Sprintf("%s%s?%s", deeplBaseApiUrl, uri, values.Encode())
+		requestUrl = fmt.Sprintf("%s%s?%s", client.EndpointUrl, uri, values.Encode())
 	}
-	if req, err = http.NewRequest(method, url, body); err != nil {
+	if req, err = http.NewRequest(method, requestUrl, body); err != nil {
 		return
 	}
 	// add header to allow the server to identify the POST request
