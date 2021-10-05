@@ -6,6 +6,8 @@ import (
 	"testing"
 )
 
+const endpointUrl = "https://api-free.deepl.com/v2/"
+
 // TestTranslation tests the functionality of the Translate API function within the deeplclient.
 func TestTranslation(t *testing.T) {
 	authKey := os.Getenv("DEEPL_TEST_AUTH_KEY")
@@ -13,8 +15,9 @@ func TestTranslation(t *testing.T) {
 		t.Fatal("could not find 'DEEPL_TEST_AUTH_KEY' environment variable")
 	}
 	client := &Client{
-		Client:  &http.Client{},
-		AuthKey: []byte(authKey),
+		Client:      &http.Client{},
+		AuthKey:     []byte(authKey),
+		EndpointUrl: endpointUrl,
 	}
 	if resp, err := client.Translate(&TranslationRequest{
 		Text:       "Hallo Welt!",
@@ -35,8 +38,9 @@ func TestGetUsage(t *testing.T) {
 		t.Fatal("could not find 'DEEPL_TEST_AUTH_KEY' environment variable")
 	}
 	client := &Client{
-		Client:  &http.Client{},
-		AuthKey: []byte(authKey),
+		Client:      &http.Client{},
+		AuthKey:     []byte(authKey),
+		EndpointUrl: endpointUrl,
 	}
 	if resp, err := client.GetUsage(); err != nil {
 		t.Fatal(err)
