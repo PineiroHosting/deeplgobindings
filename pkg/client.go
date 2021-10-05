@@ -35,19 +35,19 @@ func (client *Client) doApiFunction(uri, method string, values *url.Values) (res
 	values.Set(authKeyParamName, string(client.AuthKey))
 	// create new http request
 	var req *http.Request
-	var url string
+	var requestUrl string
 	var body io.Reader
 	if method == http.MethodPost {
-		url = fmt.Sprintf("%s%s", deeplBaseApiUrl, uri)
+		requestUrl = fmt.Sprintf("%s%s", deeplBaseApiUrl, uri)
 		valuesEncoded := values.Encode()
 		if valuesEncoded > maxBodySize {
 			return nil, errors.New("body size should not exceed maximum of " + maxBodySize)
 		}
 		body = strings.NewReader(valuesEncoded)
 	} else {
-		url = fmt.Sprintf("%s%s?%s", deeplBaseApiUrl, uri, values.Encode())
+		requestUrl = fmt.Sprintf("%s%s?%s", deeplBaseApiUrl, uri, values.Encode())
 	}
-	if req, err = http.NewRequest(method, url, body); err != nil {
+	if req, err = http.NewRequest(method, requestUrl, body); err != nil {
 		return
 	}
 	// add header to allow the server to identify the POST request
