@@ -1,4 +1,4 @@
-name: Unit test and
+name: Unit test
 on:
   push:
   pull_request:
