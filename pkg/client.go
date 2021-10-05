@@ -2,8 +2,8 @@ package deeplclient
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	"github.com/kataras/iris/core/errors"
 	"io"
 	"net/http"
 	"net/url"
@@ -17,6 +17,8 @@ const (
 	StatusQuotaExceeded  = 456
 	translateFunctionUri = "translate"
 	usageFunctionUri     = "usage"
+	// maximum body size - see https://www.deepl.com/docs-api/accessing-the-api/limits/
+	maxBodySize = 128 * 1024
 )
 
 // Client allows easy access to the DeepL API by providing methods for each API function.
@@ -37,7 +39,11 @@ func (client *Client) doApiFunction(uri, method string, values *url.Values) (res
 	var body io.Reader
 	if method == http.MethodPost {
 		url = fmt.Sprintf("%s%s", deeplBaseApiUrl, uri)
-		body = strings.NewReader(values.Encode())
+		valuesEncoded := values.Encode()
+		if valuesEncoded > maxBodySize {
+			return nil, errors.New("body size should not exceed maximum of " + maxBodySize)
+		}
+		body = strings.NewReader(valuesEncoded)
 	} else {
 		url = fmt.Sprintf("%s%s?%s", deeplBaseApiUrl, uri, values.Encode())
 	}
