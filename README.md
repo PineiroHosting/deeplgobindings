@@ -1,4 +1,4 @@
-# deeplgobindings ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg) ![](https://travis-ci.org/PineiroHosting/deeplgobindings.svg?branch=master) ![GoDoc](https://godoc.org/github.com/PineiroHosting/deeplgobindings?status.svg) ![Go Report Card](https://goreportcard.com/badge/github.com/PineiroHosting/deeplgobindings)
+# deeplgobindings ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg) [![Unit test](https://github.com/PineiroHosting/deeplgobindings/actions/workflows/go.yml/badge.svg)](https://github.com/PineiroHosting/deeplgobindings/actions/workflows/go.yml) ![GoDoc](https://godoc.org/github.com/PineiroHosting/deeplgobindings?status.svg) ![Go Report Card](https://goreportcard.com/badge/github.com/PineiroHosting/deeplgobindings)
 
 Low-level bindings for version 2 of the DeepL translation API - https://www.deepl.com/api.html
 
