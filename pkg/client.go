@@ -136,6 +136,18 @@ func LangFromString(apiLangString string) (error, ApiLang) {
 	}
 }
 
+// ApiFormality is used to set whether the translation should lean towards formal or informal language.
+type ApiFormality string
+
+const (
+	// FormalityDefault is the default used.
+	FormalityDefault = ApiFormality("default")
+	// FormalityMore sets a more formal language.
+	FormalityMore = ApiFormality("more")
+	// FormalityLess sets a more informal language.
+	FormalityLess = ApiFormality("more")
+)
+
 // TranslationRequest contains the payload data for each translation request.
 type TranslationRequest struct {
 	// field comments partially taken from official DeepL API documentation
@@ -171,6 +183,10 @@ type TranslationRequest struct {
 	// 	punctuation at the beginning and end of the sentence,
 	// 	upper/lower case at the beginning of the sentence.
 	PreserveFormatting bool
+	// Formality Sets whether the translated text should lean towards formal or informal language. This feature
+	// currently only works for target languages DE (German), FR (French), IT (Italian), ES (Spanish), NL (Dutch),
+	// PL (Polish), PT-PT, PT-BR (Portuguese) and RU (Russian).
+	Formality ApiFormality
 }
 
 // TranslationResponse represents the data of the json response of the translate API function.
@@ -215,6 +231,9 @@ func (client *Client) Translate(req *TranslationRequest) (resp *TranslationRespo
 	// do not get confused with the different handling for both booleans
 	if req.PreserveFormatting {
 		values.Add("preserve_formatting", "1")
+	}
+	if len(req.Formality) > 0 {
+		values.Add("formality", string(req.Formality))
 	}
 	var httpResp *http.Response
 	httpResp, err = client.doApiFunction(translateFunctionUri, http.MethodPost, values)
