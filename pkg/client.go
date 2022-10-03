@@ -93,20 +93,60 @@ func (client *Client) doApiFunction(uri, method string, values *url.Values) (res
 type ApiLang string
 
 const (
-	// LangEN English (EN)
-	LangEN = ApiLang("EN")
-	// LangDE German (DE)
+	// 	LangBG Bulgarian
+	LangBG = ApiLang("BG")
+	// LangCS Czech
+	LangCS = ApiLang("CS")
+	// LangDA Danish
+	LangDA = ApiLang("DA")
+	// LangDE German
 	LangDE = ApiLang("DE")
-	// LangFR French (FR)
-	LangFR = ApiLang("FR")
-	// LangES Spanish (ES)
+	// LangEL Greek
+	LangEL = ApiLang("EL")
+	// LangEN English
+	LangEN = ApiLang("EN")
+	// LangES Spanish
 	LangES = ApiLang("ES")
-	// LangIT Italian (IT)
+	// LangET Estonian
+	LangET = ApiLang("ET")
+	// LangFI Finnish
+	LangFI = ApiLang("FI")
+	// LangFR French
+	LangFR = ApiLang("FR")
+	// LangHU Hungarian
+	LangHU = ApiLang("HU")
+	// LangID Indonesian
+	LangID = ApiLang("ID")
+	// LangIT Italian
 	LangIT = ApiLang("IT")
-	// LangNL Dutch (NL)
+	// LangJA Japanese
+	LangJA = ApiLang("JA")
+	// LangLT Lithuanian
+	LangLT = ApiLang("LT")
+	// LangLV Latvian
+	LangLV = ApiLang("LV")
+	// LangNL Dutch
 	LangNL = ApiLang("NL")
-	// LangPL Polish (PL)
+	// LangPL Polish
 	LangPL = ApiLang("PL")
+	// LangPT Portuguese (all Portuguese varieties mixed)
+	LangPT = ApiLang("PT")
+	// LangRO Romanian
+	LangRO = ApiLang("RO")
+	// LangRU Russian
+	LangRU = ApiLang("RU")
+	// LangSK Slovak
+	LangSK = ApiLang("SK")
+	// LangSL Slovenian
+	LangSL = ApiLang("SL")
+	// LangSV Swedish
+	LangSV = ApiLang("SV")
+	// LangTR Turkish
+	LangTR = ApiLang("TR")
+	// LangUK Ukrainian
+	LangUK = ApiLang("UK")
+	// LangZH Chinese
+	LangZH = ApiLang("ZH")
 )
 
 // String returns the very basic string representation of the API language.
@@ -117,20 +157,60 @@ func (apiLang ApiLang) String() string {
 // LangFromString tries to find and return the matching wrapped API language type.
 func LangFromString(apiLangString string) (error, ApiLang) {
 	switch apiLangString {
-	case "EN":
-		return nil, LangEN
+	case "BG":
+		return nil, LangBG
+	case "CS":
+		return nil, LangCS
+	case "DA":
+		return nil, LangDA
 	case "DE":
 		return nil, LangDE
-	case "FR":
-		return nil, LangFR
+	case "EL":
+		return nil, LangEL
+	case "EN":
+		return nil, LangEN
 	case "ES":
 		return nil, LangES
+	case "ET":
+		return nil, LangET
+	case "FI":
+		return nil, LangFI
+	case "FR":
+		return nil, LangFR
+	case "HU":
+		return nil, LangHU
+	case "ID":
+		return nil, LangID
 	case "IT":
 		return nil, LangIT
+	case "JA":
+		return nil, LangJA
+	case "LT":
+		return nil, LangLT
+	case "LV":
+		return nil, LangLV
 	case "NL":
 		return nil, LangNL
 	case "PL":
 		return nil, LangPL
+	case "PT":
+		return nil, LangPT
+	case "RO":
+		return nil, LangRO
+	case "RU":
+		return nil, LangRU
+	case "SK":
+		return nil, LangSK
+	case "SL":
+		return nil, LangSL
+	case "SV":
+		return nil, LangSV
+	case "TR":
+		return nil, LangTR
+	case "UK":
+		return nil, LangUK
+	case "ZH":
+		return nil, LangZH
 	default:
 		return fmt.Errorf("could not find API language: %s", apiLangString), ""
 	}
