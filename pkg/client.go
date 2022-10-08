@@ -78,7 +78,7 @@ func (client *Client) doApiFunctionWithMultipartForm(uri, method string, boundar
 	if resp, err = client.Do(req); err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+
 	// check status code and wrap response
 	returnResponse, err := handleApiError(resp)
 	// in case response is not valid/confusing, omit it
