@@ -73,7 +73,7 @@ func (client *Client) doApiFunctionWithMultipartForm(uri, method string, boundar
 	}
 	// add header to allow the server to identify the POST request and auth key
 	req.Header.Set("Authorization", "DeepL-Auth-Key "+string(client.AuthKey))
-	req.Header.Set("Content-Type", "multipart/form-data; boundary="+boundary)
+	req.Header.Set("Content-Type", `multipart/form-data; boundary="`+boundary+`"`)
 
 	if resp, err = client.Do(req); err != nil {
 		return nil, err
