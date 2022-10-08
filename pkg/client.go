@@ -1,6 +1,7 @@
 package deeplclient
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,7 +13,6 @@ import (
 )
 
 const (
-	authKeyParamName = "auth_key"
 	// unofficial internal HTTP status code for "Quota exceeded"
 	StatusQuotaExceeded  = 456
 	translateFunctionUri = "translate"
@@ -29,11 +29,68 @@ type Client struct {
 	EndpointUrl string
 }
 
+// handleApiError is an internally used function to parse the status of a finished HTTP request. If any error occurred
+// (detected by status code or non-valid JSON response), it will be parsed into a known client API error
+func handleApiError(resp *http.Response) (returnResponse bool, err error) {
+	switch resp.StatusCode {
+	case http.StatusOK:
+		return true, nil
+	case http.StatusBadRequest:
+		err = &WrongRequestErr{}
+		break
+	case http.StatusForbidden:
+		err = &AuthFailedErr{}
+		return true, nil
+	case http.StatusRequestEntityTooLarge:
+		err = &RequestEntityTooLargeErr{}
+		break
+	case http.StatusTooManyRequests:
+		err = &TooManyRequestsErr{}
+		break
+	case StatusQuotaExceeded:
+		err = &QuotaExceededErr{}
+		break
+	default:
+		err = UnwrappedApiResponseCodeErr(resp.StatusCode)
+		return false, err
+	}
+	if jsonErr := json.NewDecoder(resp.Body).Decode(err); jsonErr != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+// doApiFunctionWithMultipartForm is an internally used function to execute API functions which require upload
+// of complex structures like files etc. The param uri should not begin with a slash character
+func (client *Client) doApiFunctionWithMultipartForm(uri, method string, boundary string, body *bytes.Buffer) (
+	resp *http.Response, err error) {
+	// create new http request
+	var req *http.Request
+	requestUrl := fmt.Sprintf("%s%s", client.EndpointUrl, uri)
+	if req, err = http.NewRequest(method, requestUrl, body); err != nil {
+		return
+	}
+	// add header to allow the server to identify the POST request and auth key
+	req.Header.Set("Authorization", "DeepL-Auth-Key "+string(client.AuthKey))
+	req.Header.Set("Content-Type", "multipart/form-data; boundary="+boundary)
+
+	if resp, err = client.Do(req); err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	// check status code and wrap response
+	returnResponse, err := handleApiError(resp)
+	// in case response is not valid/confusing, omit it
+	if !returnResponse {
+		resp = nil
+	}
+	return
+}
+
 // doApiFunction is an internally used function to execute API functions more easily. The param uri should not begin with
 // a slash character.
 func (client *Client) doApiFunction(uri, method string, values *url.Values) (resp *http.Response, err error) {
-	// add authentication header and encode values
-	values.Set(authKeyParamName, string(client.AuthKey))
 	// create new http request
 	var req *http.Request
 	var requestUrl string
@@ -51,41 +108,20 @@ func (client *Client) doApiFunction(uri, method string, values *url.Values) (res
 	if req, err = http.NewRequest(method, requestUrl, body); err != nil {
 		return
 	}
-	// add header to allow the server to identify the POST request
+	// add header to allow the server to identify the POST request and auth key
+	req.Header.Set("Authorization", "DeepL-Auth-Key "+string(client.AuthKey))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
 	if resp, err = client.Do(req); err != nil {
 		return nil, err
 	}
+
 	// check status code and wrap response
-	switch resp.StatusCode {
-	case http.StatusOK:
-		return
-	case http.StatusBadRequest:
-		err = &WrongRequestErr{}
-		break
-	case http.StatusForbidden:
-		err = &AuthFailedErr{}
-		resp.Body.Close()
-		return
-	case http.StatusRequestEntityTooLarge:
-		err = &RequestEntityTooLargeErr{}
-		break
-	case http.StatusTooManyRequests:
-		err = &TooManyRequestsErr{}
-		break
-	case StatusQuotaExceeded:
-		err = &QuotaExceededErr{}
-		break
-	default:
-		err = UnwrappedApiResponseCodeErr(resp.StatusCode)
-		resp.Body.Close()
-		return nil, err
+	returnResponse, err := handleApiError(resp)
+	// in case response is not valid/confusing, omit it
+	if !returnResponse {
+		resp = nil
 	}
-	if jsonErr := json.NewDecoder(resp.Body).Decode(err); jsonErr != nil {
-		resp.Body.Close()
-		return nil, jsonErr
-	}
-	resp.Body.Close()
 	return
 }
 
