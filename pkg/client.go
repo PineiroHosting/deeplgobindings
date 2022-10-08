@@ -47,6 +47,9 @@ func handleApiError(resp *http.Response) (returnResponse bool, err error) {
 	case http.StatusTooManyRequests:
 		err = &TooManyRequestsErr{}
 		break
+	case http.StatusNotFound:
+		err = &NotFoundErr{}
+		break
 	case StatusQuotaExceeded:
 		err = &QuotaExceededErr{}
 		break

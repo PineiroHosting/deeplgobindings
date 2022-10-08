@@ -72,3 +72,14 @@ type QuotaExceededErr struct {
 func (err *QuotaExceededErr) Error() string {
 	return fmt.Sprintf("server returned status code 456 (quota exceeded): %s", strconv.Quote(err.Message))
 }
+
+// NotFoundErr indicates the response code 404 returned by the remote API server and contains the error message.
+// Normally this error occurs if an undefined API endpoint of an undefined document status/result is requested.
+type NotFoundErr struct {
+	*KnownRequestErrData
+}
+
+// Error returns a compact version of all error information in order to implement the error interface.
+func (err *NotFoundErr) Error() string {
+	return fmt.Sprintf("server returned status code 404 (not found): %s", strconv.Quote(err.Message))
+}
