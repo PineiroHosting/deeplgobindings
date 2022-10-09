@@ -3,6 +3,8 @@ package deeplclient
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -110,7 +112,12 @@ func (client *Client) Translate(req *TranslationRequest) (resp *TranslationRespo
 	if err != nil {
 		return
 	}
-	defer httpResp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Printf("could not close response of translation request%e\n", err)
+		}
+	}(httpResp.Body)
 	resp = &TranslationResponse{}
 	err = json.NewDecoder(httpResp.Body).Decode(resp)
 	return

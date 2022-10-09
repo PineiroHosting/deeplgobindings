@@ -284,7 +284,12 @@ func (client *Client) GetUsage() (resp *UsageResponse, err error) {
 		return
 	}
 	// parse answer into UsageResponse struct
-	defer httpResp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Printf("could not close response of usage report retrieval request%e\n", err)
+		}
+	}(httpResp.Body)
 	resp = &UsageResponse{}
 	err = json.NewDecoder(httpResp.Body).Decode(resp)
 	return
