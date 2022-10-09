@@ -62,7 +62,7 @@ func (err *TooManyRequestsErr) Error() string {
 	return fmt.Sprintf("server returned status code 429 (too many request): %s", strconv.Quote(err.Message))
 }
 
-// AuthFailedErr indicates the response code 403 returned by the remote API server and contains the error message.
+// QuotaExceededErr indicates the response code 403 returned by the remote API server and contains the error message.
 // Normally this error occurs if the character limit has been reached.
 type QuotaExceededErr struct {
 	*KnownRequestErrData

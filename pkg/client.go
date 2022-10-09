@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	// unofficial internal HTTP status code for "Quota exceeded"
+	// StatusQuotaExceeded is the unofficial internal HTTP status code for "Quota exceeded"
 	StatusQuotaExceeded  = 456
 	translateFunctionUri = "translate"
 	usageFunctionUri     = "usage"
@@ -128,7 +128,7 @@ func (client *Client) doApiFunction(uri, method string, values *url.Values) (res
 	return
 }
 
-// ApiLang is a wrapper type for languages used in requests/responses within the translate function.
+// ApiLang is a wrapper type for languages used in requests/responses within the translation function.
 type ApiLang string
 
 const (
@@ -308,7 +308,7 @@ type TranslationRequest struct {
 	Formality ApiFormality
 }
 
-// TranslationResponse represents the data of the json response of the translate API function.
+// TranslationResponse represents the data of the json response of the translation API function.
 type TranslationResponse struct {
 	// Translations contains all requested translations and their results.
 	Translations []struct {
