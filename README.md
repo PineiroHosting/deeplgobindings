@@ -13,15 +13,15 @@ Source: [www.deepl.com](https://www.deepl.com/publisher.html)
 
 ### This project
 
-deeplgobindings allows automated interaction with DeepL translation's API in Golang. Please note that you only 
-have access to the API if you are a paid user with the plan "DeepL API".
+deeplgobindings allows automated interaction with DeepL translation's API in Golang.
 
 ## Features
 
 The following list contains all features which are/should be supported (in the future):
 - [x] translate Function (*/v2/translate*)
 - [x] usage Function (*/v2/usage*)
-- [x] support POST and GET request methods
+- [x] document translate Function (*/v2/document*)
+- [x] support POST and GET request methods (including file upload with multipart)
 - [ ] implement DeepL API's limitation rules
 
 ## Usage
@@ -32,5 +32,4 @@ If you are interested in some examples, see the examples directory in this repos
 
 ## Contribution
 
-Feel free to contribute and help this project to grow. You can also just suggest features/enhancements. In the future, 
-there will be a contributing file for newbies to read.
+Feel free to contribute and help this project to grow. You can also just suggest features/enhancements.
