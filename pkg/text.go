@@ -51,6 +51,9 @@ type TranslationRequest struct {
 	// currently only works for target languages DE (German), FR (French), IT (Italian), ES (Spanish), NL (Dutch),
 	// PL (Polish), PT-PT, PT-BR (Portuguese) and RU (Russian).
 	Formality ApiFormality
+	// GlossaryId Specify the glossary to use for the translation. Important: This requires the source_lang parameter to
+	// be set and the language pair of the glossary has to match the language pair of the request.
+	GlossaryId ApiLang
 }
 
 // TranslationResponse represents the data of the json response of the translation API function.
@@ -98,6 +101,9 @@ func (client *Client) Translate(req *TranslationRequest) (resp *TranslationRespo
 	}
 	if len(req.Formality) > 0 {
 		values.Add("formality", string(req.Formality))
+	}
+	if len(req.GlossaryId) > 0 {
+		values.Add("glossary_id", string(req.GlossaryId))
 	}
 	var httpResp *http.Response
 	httpResp, err = client.doApiFunction(translateFunctionUri, http.MethodPost, values)
