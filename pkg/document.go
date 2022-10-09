@@ -49,7 +49,7 @@ type DocumentTranslationStartResponse struct {
 // DocumentTranslationStatusRequest and DocumentTranslationStartResponse share the same fields
 type DocumentTranslationStatusRequest DocumentTranslationStartResponse
 
-// DocumentTranslationStatus is a wrapper type for various states that can occurr during translation
+// DocumentTranslationStatus is a wrapper type for various states that can occur during translation
 type DocumentTranslationStatus string
 
 const (
@@ -74,7 +74,7 @@ type DocumentTranslationStatusResponse struct {
 	// BilledCharacters is the amount of characters billed
 	BilledCharacters uint
 
-	// ErrorMessage describes an error during translation, if one occurred (if not the values is nil)
+	// ErrorMessage describes an error during translation, if one occurred (if not the value is nil)
 	ErrorMessage *string
 }
 
