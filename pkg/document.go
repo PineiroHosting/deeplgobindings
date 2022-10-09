@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -130,7 +131,10 @@ func (client *Client) StartDocumentTranslate(req *DocumentTranslationStartReques
 		}
 	}
 	// without closing the writer, the body cannot be read
-	writer.Close()
+	err = writer.Close()
+	if err != nil {
+		return nil, err
+	}
 
 	var httpResp *http.Response
 	httpResp, err = client.doApiFunctionWithMultipartForm(documentTranslateFunctionUri, http.MethodPost,
@@ -138,7 +142,12 @@ func (client *Client) StartDocumentTranslate(req *DocumentTranslationStartReques
 	if err != nil {
 		return
 	}
-	defer httpResp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Printf("could not close response of document translation request%e\n", err)
+		}
+	}(httpResp.Body)
 	resp = &DocumentTranslationStartResponse{}
 	err = json.NewDecoder(httpResp.Body).Decode(resp)
 	return
@@ -164,7 +173,12 @@ func (client *Client) CheckDocumentTranslationStatus(req *DocumentTranslationSta
 	if err != nil {
 		return
 	}
-	defer httpResp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Printf("could not close response of document translation check request%e\n", err)
+		}
+	}(httpResp.Body)
 
 	resp = &DocumentTranslationStatusResponse{}
 	err = json.NewDecoder(httpResp.Body).Decode(resp)
@@ -202,7 +216,12 @@ func (client *Client) DownloadTranslatedDocument(req *DocumentTranslationDownloa
 	if err != nil {
 		return
 	}
-	defer httpResp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Printf("could not close response of document translation download request%e\n", err)
+		}
+	}(httpResp.Body)
 	result, err = io.ReadAll(httpResp.Body)
 	return
 }
