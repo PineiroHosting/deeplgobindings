@@ -47,6 +47,9 @@ func handleApiError(resp *http.Response) (returnResponse bool, err error) {
 	case http.StatusTooManyRequests:
 		err = &TooManyRequestsErr{}
 		break
+	case http.StatusNotFound:
+		err = &NotFoundErr{}
+		break
 	case StatusQuotaExceeded:
 		err = &QuotaExceededErr{}
 		break
@@ -73,12 +76,12 @@ func (client *Client) doApiFunctionWithMultipartForm(uri, method string, boundar
 	}
 	// add header to allow the server to identify the POST request and auth key
 	req.Header.Set("Authorization", "DeepL-Auth-Key "+string(client.AuthKey))
-	req.Header.Set("Content-Type", "multipart/form-data; boundary="+boundary)
+	req.Header.Set("Content-Type", `multipart/form-data; boundary="`+boundary+`"`)
 
 	if resp, err = client.Do(req); err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+
 	// check status code and wrap response
 	returnResponse, err := handleApiError(resp)
 	// in case response is not valid/confusing, omit it
