@@ -35,6 +35,9 @@ type DocumentTranslationStartRequest struct {
 	// currently only works for target languages DE (German), FR (French), IT (Italian), ES (Spanish), NL (Dutch),
 	// PL (Polish), PT-PT, PT-BR (Portuguese) and RU (Russian).
 	Formality ApiFormality
+
+	// GlossaryId A unique ID assigned to a glossary.
+	GlossaryId ApiLang
 }
 
 // DocumentTranslationStartResponse represents the data of the json response of the document translation API function
@@ -118,6 +121,11 @@ func (client *Client) StartDocumentTranslate(req *DocumentTranslationStartReques
 	}
 	if len(req.Formality) != 0 {
 		if err = writer.WriteField("formality", string(req.Formality)); err != nil {
+			return resp, err
+		}
+	}
+	if len(req.GlossaryId) > 0 {
+		if err = writer.WriteField("glossary_id", string(req.GlossaryId)); err != nil {
 			return resp, err
 		}
 	}
