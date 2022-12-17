@@ -263,7 +263,7 @@ const (
 	// FormalityMore sets a more formal language.
 	FormalityMore = ApiFormality("more")
 	// FormalityLess sets a more informal language.
-	FormalityLess = ApiFormality("more")
+	FormalityLess = ApiFormality("less")
 )
 
 // UsageResponse represents the data of the json response of the usage API function.
