@@ -60,7 +60,7 @@ func handleApiError(resp *http.Response) (returnResponse bool, err error) {
 		return false, err
 	}
 
-	return true, nil
+	return
 }
 
 // doApiFunctionWithMultipartForm is an internally used function to execute API functions which require upload
