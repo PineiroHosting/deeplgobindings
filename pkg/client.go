@@ -56,11 +56,14 @@ func handleApiError(resp *http.Response) (returnResponse bool, err error) {
 		err = UnwrappedApiResponseCodeErr(resp.StatusCode)
 		return false, err
 	}
-	if jsonErr := json.NewDecoder(resp.Body).Decode(err); jsonErr != nil {
+	if err != nil {
 		return false, err
 	}
+	if jsonErr := json.NewDecoder(resp.Body).Decode(err); jsonErr != nil {
+		err = jsonErr
+	}
 
-	return
+	return false, err
 }
 
 // doApiFunctionWithMultipartForm is an internally used function to execute API functions which require upload
