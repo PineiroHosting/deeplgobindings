@@ -23,6 +23,7 @@
       "matchDatasources": [
         "golang-version"
       ],
+      "enabled": true,
       "major": {
         "automerge": false
       },
