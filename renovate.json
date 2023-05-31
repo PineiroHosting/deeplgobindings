@@ -1,0 +1,39 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base"
+  ],
+  "dependencyDashboard": true,
+  "packageRules": [
+    {
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest",
+        "pin",
+        "pinDigest"
+      ],
+      "automerge": true,
+      "stabilityDays": 3
+    },
+    {
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchDatasources": [
+        "golang-version"
+      ],
+      "enabled": true,
+      "major": {
+        "automerge": false
+      },
+      "minor": {
+        "automerge": false
+      },
+      "separateMinorPatch": true
+    }
+  ],
+  "postUpdateOptions": [
+    "gomodTidy"
+  ]
+}
