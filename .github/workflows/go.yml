@@ -11,7 +11,7 @@ jobs:
         with:
           go-version: 1.17.x
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Test code
         env:
           AUTHKEY: ${{ secrets.DEEPL_TEST_AUTH_KEY }}
