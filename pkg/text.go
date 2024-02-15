@@ -56,6 +56,9 @@ type TranslationRequest struct {
 	// GlossaryId Specify the glossary to use for the translation. Important: This requires the source_lang parameter to
 	// be set and the language pair of the glossary has to match the language pair of the request.
 	GlossaryId ApiLang
+	// Context is an optional field that can be used to provide additional context to the DeepL engine.
+	// This Context parameter is an alpha feature.
+	Context []string
 }
 
 // TranslationResponse represents the data of the json response of the translation API function.
@@ -106,6 +109,9 @@ func (client *Client) Translate(req *TranslationRequest) (resp *TranslationRespo
 	}
 	if len(req.GlossaryId) > 0 {
 		values.Add("glossary_id", string(req.GlossaryId))
+	}
+	if len(req.Context) > 0 {
+		values.Add("context", strings.Join(req.Context, ","))
 	}
 	var httpResp *http.Response
 	httpResp, err = client.doApiFunction(translateFunctionUri, http.MethodPost, values)
